@@ -71,7 +71,7 @@ class ErdosRenyi_network(object):
         net = Network()
         net.from_nx(self.G)
         
-        net.show('Erdos-Renyi_n='+str(self.n)+'_mu='+str(self.average_degreee)+'.html')
+        net.show('Erdos-Renyi_n='+str(self.n)+'_mu='+str(self.average_degreee)+self.dt_string+'.html')
         
         
     # Confecciona o histograma do grau
