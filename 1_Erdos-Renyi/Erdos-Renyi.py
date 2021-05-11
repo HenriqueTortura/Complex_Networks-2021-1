@@ -1,11 +1,13 @@
 import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 import networkx as nx
 from pyvis.network import Network
 
 
+#%%
 class ErdosRenyi_network(object):
     
     def __init__(self, n, average_degreee, input_method = False):
@@ -61,6 +63,8 @@ class ErdosRenyi_network(object):
         self.shortest_path_length_mu = self.floyd_warshall.mean()
         self.shortest_path_length_sigma = self.floyd_warshall.std()
         
+        #Identificador único do grafo gerado
+        self.dt_string = datetime.now().strftime("_%d-%m-%Y_%H-%M-%S")
         
     # Gera uma visualização do grafo em html
     def Visualize(self):
@@ -101,7 +105,9 @@ class ErdosRenyi_network(object):
                  color='#3971cc', bbox={'facecolor': 'white', 'alpha': 0.8,
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
-        plt.savefig('Degree_RelativeFrequency_n='+str(self.n)+'_mu='+str(self.average_degreee)+'.png',
+        
+        filename = 'img/Degree_n='+str(self.n)+'_mu='+str(self.average_degreee)
+        plt.savefig(filename+self.dt_string+'.png',
                     dpi=200, bbox_inches='tight')
 
 
@@ -135,7 +141,9 @@ class ErdosRenyi_network(object):
                  color='#3971cc', bbox={'facecolor': 'white', 'alpha': 0.8,
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
-        plt.savefig('img/Clustering_Coefficient_RelativeFrequency_n='+str(self.n)+'_mu='+str(self.average_degreee)+'.png',
+        
+        filename = 'img/Clustering_Coefficient_n='+str(self.n)+'_mu='+str(self.average_degreee)
+        plt.savefig(filename+self.dt_string+'.png',
                     dpi=200, bbox_inches='tight')
 
 
@@ -166,20 +174,23 @@ class ErdosRenyi_network(object):
                  color='#3971cc', bbox={'facecolor': 'white', 'alpha': 0.8,
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
-        plt.savefig('img/Floyd_Warshall_RelativeFrequency_n='+str(self.n)+'_mu='+str(self.average_degreee)+'.png',
+        
+        filename = 'img/Shortest_Path_Length_n='+str(self.n)+'_mu='+str(self.average_degreee)
+        plt.savefig(filename+self.dt_string+'.png',
                     dpi=200, bbox_inches='tight')
-
 
 #%% Rodando 
 
-n = 500
-average_degreee = 10
+n = 100
+average_degreee = 2
 
 ER = ErdosRenyi_network(n, average_degreee)
 
-print(ER.p)
-# ER.Visualize()
+# print(ER.p)
+ER.Visualize()
 ER.Plot_Degree_Histogram()
+ER.Plot_Clustering_Coefficient_Histogram()
+ER.Plot_Shortest_Path_Length_Histogram()
 
 
 
