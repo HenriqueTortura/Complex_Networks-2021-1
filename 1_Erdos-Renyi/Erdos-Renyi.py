@@ -7,7 +7,8 @@ import networkx as nx
 from pyvis.network import Network
 
 
-#%%
+#%% Classe da rede de Erdos-Renyi
+
 class ErdosRenyi_network(object):
     
     def __init__(self, n, average_degreee, input_method = False):
