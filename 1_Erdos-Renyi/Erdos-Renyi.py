@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 from datetime import datetime
 
 import networkx as nx
@@ -11,41 +12,29 @@ from pyvis.network import Network
 
 class ErdosRenyi_network(object):
     
-    def __init__(self, n, average_degreee, input_method = False):
+    def __init__(self, n, average_degreee):
         
-        # Define os principais parâmetros sem pedir informação ao usuário
-        if not input_method:
-            self.n = n
-            self.average_degreee = average_degreee
-            self.p = self.average_degreee / (self.n-1)
+        # Recebe os parâmetros principais
+        self.n = n
+        self.average_degreee = average_degreee
         
-        # Define os principais parâmetros por um input do usuário
-        while input_method:
-            self.n = int(input('Number of nodes: '))
-            self.average_degreee = np.abs(float(input('Expected mean degree: ')))
-            if self.n > 1:
-                self.p = self.average_degreee / (self.n-1)
-                if self.p < 0 or self.p > 1:
-                    print('\nThe probability of an edge to be included is not in the interval [0,1].')
-                else:
-                    input_method = False
-            else:
-                print('\nMust have at least two nodes.')
+        # Calcula a probabilidade de conexão
+        self.p = self.average_degreee / (self.n-1)
         
-        # Cria matriz de adjacência e grafo
-        self.adjacency_matrix = np.zeros((n,n))
-        
+        # Inicializa o grafo
         self.G = nx.Graph()
-        self.G.add_nodes_from(range(1,n+1))
+        self.G.add_nodes_from(range(0,self.n))
         
-        # Laço que percorre apenas os elementos acima da diagonal principal,
-        # de maneira que a matriz adjacência se torna uma matriz triangular superior
-        for i in range(self.n):
-            for j in range(i+1,self.n):
-                if np.random.uniform(low=0, high=1) <= self.p:
-                    self.adjacency_matrix[i,j] = 1
-                    self.G.add_edge(i+1,j+1)
-                    
+        # Gera a lista de conexões a serem realizadas
+        sorting = np.random.rand(self.n,self.n)
+        self.connection = np.transpose(np.array(np.where(self.p>sorting)))
+        # Elimina triangular inferior
+        self.connection = np.delete(self.connection, np.where(self.connection[:,0]>=self.connection[:,1]), axis=0)
+       
+        # Realiza as conexões no grafo
+        for i in range(np.size(self.connection, axis=0)):
+            self.G.add_edge(int(self.connection[i,0]), int(self.connection[i,1]))
+            
         # Obtem a média e o desvio padrão do grau
         self.degree = np.array(sorted([d for n, d in self.G.degree()], reverse=True))
         self.degree_mu = self.degree.mean()
@@ -66,13 +55,15 @@ class ErdosRenyi_network(object):
         
         #Identificador único do grafo gerado
         self.dt_string = datetime.now().strftime("_%d-%m-%Y_%H-%M-%S")
+        self.filename = 'img/Erdos-Renyi'+'_n='+str(self.n)+'_mu='+str(self.average_degreee)+self.dt_string
         
     # Gera uma visualização do grafo em html
     def Visualize(self):
+        
         net = Network()
         net.from_nx(self.G)
-        
-        net.show('Erdos-Renyi_n='+str(self.n)+'_mu='+str(self.average_degreee)+self.dt_string+'.html')
+        net.show_buttons()
+        net.show(self.filename+'.html')
         
         
     # Confecciona o histograma do grau
@@ -107,15 +98,14 @@ class ErdosRenyi_network(object):
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
         
-        filename = 'img/Degree_n='+str(self.n)+'_mu='+str(self.average_degreee)
-        plt.savefig(filename+self.dt_string+'.png',
+        plt.savefig(self.filename+'_Degree_Histogram.png',
                     dpi=200, bbox_inches='tight')
 
 
     # Confecciona o histograma do coeficiente de aglomeração
-    def Plot_Clustering_Coefficient_Histogram(self):
+    def Plot_Clustering_Coefficient_Histogram(self, number_of_bins = 11):
         
-        bins = np.linspace(0, 1, num=11)
+        bins = np.linspace(0, 1, num = number_of_bins)
             
         text = '\n'.join((
                 r'$\mu=%.2f$' % (self.clustering_coefficient_mu, ),
@@ -131,7 +121,11 @@ class ErdosRenyi_network(object):
                  linewidth=1.5, weights=weights, zorder=1)
         
         # plt.legend(loc='best', fontsize=18)
-        plt.xticks(bins, fontsize = 14)
+        ax.xaxis.set_major_locator(MultipleLocator(0.1))
+        if 1/(number_of_bins-1) != 0.1:
+            ax.xaxis.set_minor_locator(MultipleLocator(1/(number_of_bins-1)))
+            
+        plt.xticks(fontsize = 14)
         plt.yticks(fontsize = 14)
         plt.xlim(bins[0], bins[-1])
         plt.xlabel('Clustering Coefficient', fontsize=18)
@@ -143,8 +137,7 @@ class ErdosRenyi_network(object):
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
         
-        filename = 'img/Clustering_Coefficient_n='+str(self.n)+'_mu='+str(self.average_degreee)
-        plt.savefig(filename+self.dt_string+'.png',
+        plt.savefig(self.filename+'_Clustering_Coefficient_Histogram.png',
                     dpi=200, bbox_inches='tight')
 
 
@@ -176,22 +169,77 @@ class ErdosRenyi_network(object):
                                       'pad': 0.5, 'boxstyle': 'round'},
                  transform = ax.transAxes)
         
-        filename = 'img/Shortest_Path_Length_n='+str(self.n)+'_mu='+str(self.average_degreee)
-        plt.savefig(filename+self.dt_string+'.png',
+        plt.savefig(self.filename+'_Shortest_Path_Length_Histogram.png',
                     dpi=200, bbox_inches='tight')
 
 #%% Rodando 
 
-n = 100
-average_degreee = 2
+# n = 500
+# average_degreee = 5
+# number_of_graphs = 10
 
-ER = ErdosRenyi_network(n, average_degreee)
+# tolerance = 0.02
 
-# print(ER.p)
-ER.Visualize()
-ER.Plot_Degree_Histogram()
-ER.Plot_Clustering_Coefficient_Histogram()
-ER.Plot_Shortest_Path_Length_Histogram()
+# filename = 'Teste.dat'
+
+# strings = ['Graph', 'Mean Degree', 'Standard deviation', 'Mean Clustering Coefficient',
+#            'Standard deviation', 'Mean Shortest Path Length', 'Standard deviation\n']
+
+# with open(filename, 'w+') as datafile:
+#     datafile.write('#{:<5s}\t{:<10s}\t{:<18s}\t{:<30s}\t{:<18s}\t{:<30s}\t{:<18s}\n'.format(*strings))
+# datafile.closed
+# Graph = ErdosRenyi_network(n, average_degreee)
+
+
+# #%%
+# i = 1
+# while i <= number_of_graphs:
+    
+#     Graph = ErdosRenyi_network(n, average_degreee)
+    
+#     if abs(Graph.degree_mu-average_degreee) <= tolerance*average_degreee:  
+        
+#         print('Graph ' + str(i) + ' generated.')
+    
+#         strings = ['{:0>2d}'.format(i), '{:.3f}'.format(Graph.degree_mu),
+#                     '{:.3f}'.format(Graph.degree_sigma),
+#                     '{:.3f}'.format(Graph.clustering_coefficient_mu),
+#                     '{:.3f}'.format(Graph.clustering_coefficient_sigma), 
+#                     '{:.3f}'.format(Graph.shortest_path_length_mu),
+#                     '{:.3f}'.format(Graph.shortest_path_length_sigma)]
+        
+#         with open(filename, 'a+') as datafile:
+#             datafile.write('{:<5s}\t{:<10s}\t{:<18s}\t{:<30s}\t{:<18s}\t{:<30s}\t{:<18s}\n'.format(*strings))
+#         datafile.closed
+
+#         i += 1
+# #%%
+
+# a = np.genfromtxt(filename)
+
+#%%
+
+n = 500
+average_degree = 5
+tolerance = 0.02
+limit = 100
+
+i = 1
+
+Graph = ErdosRenyi_network(n, average_degree)
+
+while (np.abs(Graph.degree_mu-average_degree)>average_degree*tolerance) and i <= limit:
+    Graph = ErdosRenyi_network(n, average_degree)
+    i += 1
+
+#%%
+if (np.abs(Graph.degree_mu-average_degree)<average_degree*tolerance):
+
+    Graph.Visualize()
+    
+    Graph.Plot_Degree_Histogram()
+    Graph.Plot_Clustering_Coefficient_Histogram(number_of_bins=31)
+    Graph.Plot_Shortest_Path_Length_Histogram()
 
 
 
