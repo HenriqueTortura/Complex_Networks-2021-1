@@ -651,11 +651,11 @@ class Waxman_network(object):
 #%% Rodando
 
 n = 500
-average_degree = 5.7
+average_degree = 6
 
 coord = np.random.rand(n,2)
 
-tolerance = 0.02
+tolerance = 0.05
 limit = 100
 
 #%% Voronoi

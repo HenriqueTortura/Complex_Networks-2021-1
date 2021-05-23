@@ -172,50 +172,6 @@ class ErdosRenyi_network(object):
         plt.savefig(self.filename+'_Shortest_Path_Length_Histogram.png',
                     dpi=200, bbox_inches='tight')
 
-#%% Rodando 
-
-# n = 500
-# average_degreee = 5
-# number_of_graphs = 10
-
-# tolerance = 0.02
-
-# filename = 'Teste.dat'
-
-# strings = ['Graph', 'Mean Degree', 'Standard deviation', 'Mean Clustering Coefficient',
-#            'Standard deviation', 'Mean Shortest Path Length', 'Standard deviation\n']
-
-# with open(filename, 'w+') as datafile:
-#     datafile.write('#{:<5s}\t{:<10s}\t{:<18s}\t{:<30s}\t{:<18s}\t{:<30s}\t{:<18s}\n'.format(*strings))
-# datafile.closed
-# Graph = ErdosRenyi_network(n, average_degreee)
-
-
-# #%%
-# i = 1
-# while i <= number_of_graphs:
-    
-#     Graph = ErdosRenyi_network(n, average_degreee)
-    
-#     if abs(Graph.degree_mu-average_degreee) <= tolerance*average_degreee:  
-        
-#         print('Graph ' + str(i) + ' generated.')
-    
-#         strings = ['{:0>2d}'.format(i), '{:.3f}'.format(Graph.degree_mu),
-#                     '{:.3f}'.format(Graph.degree_sigma),
-#                     '{:.3f}'.format(Graph.clustering_coefficient_mu),
-#                     '{:.3f}'.format(Graph.clustering_coefficient_sigma), 
-#                     '{:.3f}'.format(Graph.shortest_path_length_mu),
-#                     '{:.3f}'.format(Graph.shortest_path_length_sigma)]
-        
-#         with open(filename, 'a+') as datafile:
-#             datafile.write('{:<5s}\t{:<10s}\t{:<18s}\t{:<30s}\t{:<18s}\t{:<30s}\t{:<18s}\n'.format(*strings))
-#         datafile.closed
-
-#         i += 1
-# #%%
-
-# a = np.genfromtxt(filename)
 
 #%%
 
